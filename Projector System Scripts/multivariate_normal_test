@@ -1,0 +1,38 @@
+from PIL import Image
+import colorsys
+import math
+import numpy as np
+import random
+
+# step 1: plug x/y from 0-size values into function to get corresponding value and put it in 2d array of sizeX/sizeY
+# step 2: convert 0-1 value to RGB -> convert to hue, standardize chroma and lightness, then convert HCL to RGB
+# step 3: convert 2d array to png file
+
+width = 1280 * 0.75
+height = 800 * 0.75
+mu = (250, 400)
+sigma = (200, 400)
+saturation = 1.0
+value = 1.0
+filename = "test_dist.png"
+
+def xyFunction(x, y):
+    A = 2 * math.pi * (sigma[0] ** 2) * (sigma[1] ** 2)
+    B = (x - mu[0]) ** 2
+    C = 2 * (sigma[0] ** 2)
+    D = (y - mu[1]) ** 2
+    F = 2 * (sigma[1] ** 2)
+    return math.exp(-((B/C) + (D/F)))
+    # return (1/(2 * math.pi * (sigma[0] ** 2) * (sigma[1] ** 2))) * math.exp(- ((x-mu[0]) ** 2)/(2*(sigma[0] ** 2)) + ((y-mu[1]) ** 2)/(2*(sigma[1] ** 2)))
+    # return random.random()
+
+def hue2rgb(hue):
+    return tuple(np.uint8(component * 255) for component in colorsys.hsv_to_rgb(hue, saturation, value))
+
+pixelArray = [[0 for i in range(width)] for j in range(height)]
+for x in range(height):
+    for y in range(width):
+        pixelArray[x][y] = hue2rgb(xyFunction(x, y))
+
+img = Image.fromarray(np.array(pixelArray), mode="RGB")
+img.save(filename)
